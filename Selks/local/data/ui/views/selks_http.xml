@@ -1,0 +1,239 @@
+<form>
+  <label>HTTP</label>
+  <description>Chronologie</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="TimeInterval">
+      <label>Hour</label>
+      <default>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="Selks_Sonde" searchWhenChanged="true">
+      <label>Sonde</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>host="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <search>
+        <query>index=ids | stats count by host</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Sonde_Protocole" searchWhenChanged="true">
+      <label>Protocole</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>app_proto="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>app_proto</fieldForLabel>
+      <fieldForValue>app_proto</fieldForValue>
+      <search>
+        <query>index=ids $Selks_Sonde$ | stats count by app_proto</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_EventType" searchWhenChanged="true">
+      <label>Event Type</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>event_type="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>event_type</fieldForLabel>
+      <fieldForValue>event_type</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$| stats count by event_type</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_IP-Source" searchWhenChanged="true">
+      <label>IP Source</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>src_ip="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>src_ip</fieldForLabel>
+      <fieldForValue>src_ip</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$| stats count by src_ip</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_IP-Dest" searchWhenChanged="true">
+      <label>IP Destination</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>dest_ip="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>dest_ip</fieldForLabel>
+      <fieldForValue>dest_ip</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$ AND $Selks_IP-Source$ | stats count by dest_ip</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <map>
+        <title>HTTP-GeoIP</title>
+        <search>
+          <query>index=ids event_type=http | iplocation src_ip | geostats latfield=lat longfield=lon count by src_ip</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>HTTP-AcceptEncoding</title>
+        <search>
+          <query>index=ids event_type=http http.accept_encoding!=NULL | stats count by http.accept_encoding</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>HTTP-StatusCode</title>
+        <search>
+          <query>index=ids event_type=http | stats count by http.status</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>HTTP-UserAgentName</title>
+        <search>
+          <query>index=ids event_type=http | stats count by http_user_agent</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>HTTP-Vary</title>
+        <search>
+          <query>index=ids event_type=http | stats count by http.vary</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>HTTP-ContentTypeByAplication</title>
+        <search>
+          <query>index=ids event_type=http AND http.content_type="application*" | stats count by http.http_content_type</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>HTTP-EventsOverTime</title>
+        <search>
+          <query>index=ids event_type=http | timechart count by event_type</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>HTTP-Servers</title>
+        <search>
+          <query>index=ids event_type=http | stats count by http.server</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>HTTP-UserAgentOS</title>
+        <search>
+          <query>index=ids event_type=http | rex field=http_user_agent "\((?P&lt;os&gt;[^;]+);(?P&lt;vers&gt;[^;)]+).*$" | search os=* | rex field=os "(?&lt;os2&gt;^\S*)" | search os2=* | stats count by os2</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>HTTP-EventsList</title>
+        <search>
+          <query>index=ids event_type=http | table _time src_ip src_port proto dest_ip dest_port http.http_method http.hostname http.status http.protocol http.server</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</form>

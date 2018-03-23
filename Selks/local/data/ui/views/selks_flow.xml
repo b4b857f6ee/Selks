@@ -1,0 +1,145 @@
+<form>
+  <label>Flow</label>
+  <description>Chronologie</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="TimeInterval">
+      <label>Hour</label>
+      <default>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="Selks_Sonde" searchWhenChanged="true">
+      <label>Sonde</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>host="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <search>
+        <query>index=ids | stats count by host</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Sonde_Protocole" searchWhenChanged="true">
+      <label>Protocole</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>app_proto="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>app_proto</fieldForLabel>
+      <fieldForValue>app_proto</fieldForValue>
+      <search>
+        <query>index=ids $Selks_Sonde$ | stats count by app_proto</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_EventType" searchWhenChanged="true">
+      <label>Event Type</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>event_type="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>event_type</fieldForLabel>
+      <fieldForValue>event_type</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$| stats count by event_type</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_IP-Source" searchWhenChanged="true">
+      <label>IP Source</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>src_ip="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>src_ip</fieldForLabel>
+      <fieldForValue>src_ip</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$| stats count by src_ip</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_IP-Dest" searchWhenChanged="true">
+      <label>IP Destination</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>dest_ip="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>dest_ip</fieldForLabel>
+      <fieldForValue>dest_ip</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$ AND $Selks_IP-Source$ | stats count by dest_ip</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Application Protocol</title>
+        <search>
+          <query>index=ids event_type=flow | timechart count by app_proto</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Flow unique count of src and dst IP</title>
+        <search>
+          <query>index=ids NOT event_type=stats | stats dc(dest_ip) as DestIp by src_ip | where DestIp=1 | stats sum(DestIp) as Total</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>FLOW-EventsList</title>
+        <search>
+          <query>index=ids event_type=flow | table _time flow.reason flow.age src_ip src_port proto dest_ip dest_port flow_id event_type</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</form>

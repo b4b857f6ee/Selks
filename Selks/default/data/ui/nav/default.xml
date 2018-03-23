@@ -1,0 +1,29 @@
+<nav search_view="search" color="#54c5f9">
+  <view name="selks_ids" default='true' />
+<collection label="Dashboard_Kibana">
+  <view name="selks_alerts" />
+  <view name="selks_all" />
+  <view name="selks_file-transactions" />
+  <view name="selks_flow" />
+  <view name="selks_http" />
+  <view name="selks_ids" />
+  <view name="selks_overview" />
+  <view name="selks_smtp" />
+  <view name="selks_ssh" />
+  <view name="selks_stats" />
+  <view name="selks_tls" />
+  <view name="selks_vlan" />
+</collection>
+<collection label="Scirius">
+  <view name="scirius_rules-activity" />
+  <view name="scirius_captures-stats" />
+  <view name="scirius_memory-usage" />
+  <view name="scirius_problem-indicators" />
+</collection>
+<view name="search"/>
+<collection label="Link">
+<a href="https://www.stamus-networks.com/open-source/#selks">Website WebSite</a>
+<a href="https://github.com/StamusNetworks/SELKS">Github</a>
+<a href="https://github.com/b4b857f6ee">My Github</a>
+</collection>
+</nav>

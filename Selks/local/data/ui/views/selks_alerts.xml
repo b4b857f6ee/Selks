@@ -1,0 +1,118 @@
+<form>
+  <label>Alerts</label>
+  <description>Chronologie</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="TimeInterval">
+      <label>Hour</label>
+      <default>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="Selks_Sonde" searchWhenChanged="true">
+      <label>Sonde</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>host="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <search>
+        <query>index=ids | stats count by host</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Sonde_Protocole" searchWhenChanged="true">
+      <label>Protocole</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>app_proto="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>app_proto</fieldForLabel>
+      <fieldForValue>app_proto</fieldForValue>
+      <search>
+        <query>index=ids $Selks_Sonde$ | stats count by app_proto</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_EventType" searchWhenChanged="true">
+      <label>Event Type</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>event_type="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>event_type</fieldForLabel>
+      <fieldForValue>event_type</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$| stats count by event_type</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_IP-Source" searchWhenChanged="true">
+      <label>IP Source</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>src_ip="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>src_ip</fieldForLabel>
+      <fieldForValue>src_ip</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$| stats count by src_ip</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="Selks_IP-Dest" searchWhenChanged="true">
+      <label>IP Destination</label>
+      <choice value="*">Tous</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>dest_ip="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+      <fieldForLabel>dest_ip</fieldForLabel>
+      <fieldForValue>dest_ip</fieldForValue>
+      <search>
+        <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$ AND $Selks_IP-Source$ | stats count by dest_ip</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>GeoMap</title>
+      <map>
+        <title>GeoMap</title>
+        <search>
+          <query>index=ids (host="*") AND event_type=alert AND (src_ip="*") AND (dest_ip="*") AND alert.signature!="" | iplocation src_ip | stats count by Country | geom geo_countries featureIdField="Country"</query>
+          <earliest>$TimeInterval.earliest$</earliest>
+          <latest>$TimeInterval.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.type">choropleth</option>
+        <option name="refresh.display">progressbar</option>
+      </map>
+    </panel>
+  </row>
+</form>
