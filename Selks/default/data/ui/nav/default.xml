@@ -8,11 +8,6 @@
   <view name="selks_http" />
   <view name="selks_ids" />
   <view name="selks_overview" />
-  <view name="selks_smtp" />
-  <view name="selks_ssh" />
-  <view name="selks_stats" />
-  <view name="selks_tls" />
-  <view name="selks_vlan" />
 </collection>
 <collection label="Scirius">
   <view name="scirius_rules-activity" />
