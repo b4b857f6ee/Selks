@@ -4,7 +4,7 @@ Splunk Application for Selks IDS
 The goal of this application is to provide a dashboard on Selks for Splunk using the log of the eve.json of the suricata of the appliance
 This application provide you the same dashboard you can found on the appliance directly.
 
-Please install the TA-Suricata before everything : https://splunkbase.splunk.com/app/2760/
+Please install the TA-Suricata before : https://splunkbase.splunk.com/app/2760/
 
 Selks project : https://github.com/StamusNetworks/SELKS
 
