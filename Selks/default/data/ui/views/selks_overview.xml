@@ -1,11 +1,10 @@
 <form>
-  <label>IDS</label>
-  <description>Chronologie</description>
+  <label>Overview</label>
   <fieldset submitButton="false" autoRun="true">
     <input type="time" token="TimeInterval">
       <label>Hour</label>
       <default>
-        <earliest>-24h@m</earliest>
+        <earliest>-4h@m</earliest>
         <latest>now</latest>
       </default>
     </input>
@@ -22,7 +21,7 @@
       <fieldForValue>host</fieldForValue>
       <search>
         <query>index=ids | stats count by host</query>
-        <earliest>-24h@m</earliest>
+        <earliest>-4h@m</earliest>
         <latest>now</latest>
       </search>
     </input>
@@ -40,7 +39,7 @@
       <fieldForValue>app_proto</fieldForValue>
       <search>
         <query>index=ids $Selks_Sonde$ | stats count by app_proto</query>
-        <earliest>-24h@m</earliest>
+        <earliest>-4h@m</earliest>
         <latest>now</latest>
       </search>
     </input>
@@ -58,7 +57,7 @@
       <fieldForValue>event_type</fieldForValue>
       <search>
         <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$| stats count by event_type</query>
-        <earliest>-24h@m</earliest>
+        <earliest>-4h@m</earliest>
         <latest>now</latest>
       </search>
     </input>
@@ -76,7 +75,7 @@
       <fieldForValue>src_ip</fieldForValue>
       <search>
         <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$| stats count by src_ip</query>
-        <earliest>-24h@m</earliest>
+        <earliest>-4h@m</earliest>
         <latest>now</latest>
       </search>
     </input>
@@ -94,7 +93,7 @@
       <fieldForValue>dest_ip</fieldForValue>
       <search>
         <query>index=ids $Sonde_Protocole$ AND $Selks_Sonde$ AND $Selks_EventType$ AND $Selks_IP-Source$ | stats count by dest_ip</query>
-        <earliest>-24h@m</earliest>
+        <earliest>-4h@m</earliest>
         <latest>now</latest>
       </search>
     </input>
